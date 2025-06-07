@@ -1,3 +1,5 @@
+import pprint
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -40,7 +42,7 @@ def gini_impurity(y):
     return 1 - sum(p**2)
 
 
-def splitter(X, y):
+def find_best_split(X, y):
     current_impurity = gini_impurity(y)
 
     best_gain = 0
@@ -78,13 +80,47 @@ def splitter(X, y):
                 best_feature_index = feature_index
                 best_threshold = threshold
 
-    return best_feature_index, best_threshold
+    return best_feature_index, best_threshold, best_gain
+
+
+def most_common_label(y):
+    """Return the most common label in y."""
+    return np.bincount(y).argmax()
+
+
+def splitter(X, y):
+    if gini_impurity(y) == 0:
+        leaf_value = y[0]
+        return {"value": leaf_value}
+
+    feature_index, threshold, info_gain = find_best_split(X, y)
+
+    if info_gain == 0:
+        leaf_value = most_common_label(y)
+        return {"value": leaf_value}
+
+    left_indices = X[:, feature_index] <= threshold
+    right_indices = X[:, feature_index] > threshold
+
+    X_left, y_left = X[left_indices], y[left_indices]
+    X_right, y_right = X[right_indices], y[right_indices]
+
+    left_subtree = splitter(X_left, y_left)
+    right_subtree = splitter(X_right, y_right)
+
+    return {
+        "feature_index": feature_index,
+        "threshold": threshold,
+        "left": left_subtree,
+        "right": right_subtree,
+    }
 
 
 if __name__ == "__main__":
     iris = load_iris()
     # visualize_iris(iris)
     X, y = iris.data, iris.target
-    best_feature_index, best_threshold = splitter(X, y)
-    print("Best feature:", iris.feature_names[best_feature_index])
-    print("Best threshold:", best_threshold)
+    tree = splitter(X, y)
+
+    pprint.pprint(tree)
+    visualize_iris(iris)

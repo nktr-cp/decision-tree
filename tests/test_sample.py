@@ -1,4 +1,4 @@
-from src.main import gini_impurity
+from src.main import gini_impurity, splitter
 
 def test_impurity():
     # Test with a list of labels
