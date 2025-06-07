@@ -43,6 +43,7 @@ def gini_impurity(y):
 
 
 def find_best_split(X, y):
+    """Find the best feature and threshold to split the dataset."""
     current_impurity = gini_impurity(y)
 
     best_gain = 0
@@ -92,6 +93,7 @@ def compute_class_proportions(y, n_classes):
 
 
 def splitter(X, y, n_classes, max_depth=None, current_depth=0):
+    """Recursively split the dataset to build the decision tree."""
     if max_depth is not None and current_depth >= max_depth:
         leaf_value = compute_class_proportions(y, n_classes=n_classes)
         return {"value": leaf_value}
@@ -152,6 +154,7 @@ def predict_one(tree, x):
 
 
 def predict_probabilities(tree, X):
+    """Predict class probabilities for all instances in X."""
     probability_list = [predict_one(tree, x) for x in X]
     return np.array(probability_list)
 
