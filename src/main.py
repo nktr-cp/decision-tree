@@ -3,9 +3,9 @@ import pandas as pd
 from sklearn.datasets import load_iris
 
 
-def visualize(iris):
-    X, y = iris.data, iris.target
-    df = pd.DataFrame(X, columns=iris.feature_names)
+def visualize_iris(dataset):
+    X, y = dataset.data, dataset.target
+    df = pd.DataFrame(X, columns=dataset.feature_names)
     df["target"] = y
 
     n_features = X.shape[1]
@@ -15,7 +15,7 @@ def visualize(iris):
         for j in range(n_features):
             if i == j:
                 axes[i, j].hist(X[:, i], bins=20, color="skyblue")
-                axes[i, j].set_title(iris.feature_names[i])
+                axes[i, j].set_title(dataset.feature_names[i])
             else:
                 for target_class in range(len(iris.target_names)):
                     axes[i, j].scatter(
@@ -31,8 +31,7 @@ def visualize(iris):
     plt.show()
 
 
-# Gini impurity function
-def impurity(y):
+def gini_impurity(y):
     """Calculate the Gini impurity for a list of labels."""
     if len(y) == 0:
         return 0
@@ -42,4 +41,4 @@ def impurity(y):
 
 if __name__ == "__main__":
     iris = load_iris()
-    visualize(iris)
+    visualize_iris(iris)
