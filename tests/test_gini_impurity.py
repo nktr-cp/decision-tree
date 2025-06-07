@@ -1,4 +1,4 @@
-from src.decision_tree import DecisionTreeClassifier
+from src.decision_tree_classifier import DecisionTreeClassifier
 
 def test_gini_impurity():
     # Test with a list of labels
