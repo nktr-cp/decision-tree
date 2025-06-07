@@ -83,24 +83,27 @@ def find_best_split(X, y):
     return best_feature_index, best_threshold, best_gain
 
 
-def most_common_label(y):
-    """Return the most common label in y."""
-    return np.bincount(y).argmax()
+def compute_class_proportions(y, n_classes):
+    """Compute the proportions of each class in y."""
+    counts = np.bincount(y, minlength=n_classes)
+    if counts.sum() == 0:
+        return np.zeros(n_classes)
+    return counts / counts.sum()
 
 
-def splitter(X, y, max_depth=None, current_depth=0):
+def splitter(X, y, n_classes, max_depth=None, current_depth=0):
     if max_depth is not None and current_depth >= max_depth:
-        leaf_value = most_common_label(y)
+        leaf_value = compute_class_proportions(y, n_classes=n_classes)
         return {"value": leaf_value}
 
     if gini_impurity(y) == 0:
-        leaf_value = y[0]
+        leaf_value = compute_class_proportions(y, n_classes=n_classes)
         return {"value": leaf_value}
 
     feature_index, threshold, info_gain = find_best_split(X, y)
 
     if info_gain == 0:
-        leaf_value = most_common_label(y)
+        leaf_value = compute_class_proportions(y, n_classes=n_classes)
         return {"value": leaf_value}
 
     left_indices = X[:, feature_index] <= threshold
@@ -109,8 +112,20 @@ def splitter(X, y, max_depth=None, current_depth=0):
     X_left, y_left = X[left_indices], y[left_indices]
     X_right, y_right = X[right_indices], y[right_indices]
 
-    left_subtree = splitter(X_left, y_left, max_depth, current_depth + 1)
-    right_subtree = splitter(X_right, y_right, max_depth, current_depth + 1)
+    left_subtree = splitter(
+        X_left,
+        y_left,
+        n_classes=n_classes,
+        max_depth=max_depth,
+        current_depth=current_depth + 1,
+    )
+    right_subtree = splitter(
+        X_right,
+        y_right,
+        n_classes=n_classes,
+        max_depth=max_depth,
+        current_depth=current_depth + 1,
+    )
 
     return {
         "feature_index": feature_index,
@@ -136,9 +151,15 @@ def predict_one(tree, x):
     return node["value"]
 
 
+def predict_probabilities(tree, X):
+    probability_list = [predict_one(tree, x) for x in X]
+    return np.array(probability_list)
+
+
 def predict(tree, X):
     """Predict class labels for all instances in X."""
-    return np.array([predict_one(tree, x) for x in X])
+    probabilities = predict_probabilities(tree, X)
+    return np.argmax(probabilities, axis=1)
 
 
 if __name__ == "__main__":
@@ -148,8 +169,8 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
     for depth in range(1, 5):
         print(f"Training decision tree with max depth = {depth}")
-        tree = splitter(X_train, y_train, max_depth=depth)
+        tree = splitter(X_train, y_train, n_classes=3, max_depth=depth)
 
         y_pred = predict(tree, X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        print(f"Accuracy: {accuracy:.2f}")
+        print(f"Accuracy: {accuracy:.2f}\n")
