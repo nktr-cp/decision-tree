@@ -88,7 +88,11 @@ def most_common_label(y):
     return np.bincount(y).argmax()
 
 
-def splitter(X, y):
+def splitter(X, y, max_depth=None, current_depth=0):
+    if max_depth is not None and current_depth >= max_depth:
+        leaf_value = most_common_label(y)
+        return {"value": leaf_value}
+
     if gini_impurity(y) == 0:
         leaf_value = y[0]
         return {"value": leaf_value}
@@ -105,8 +109,8 @@ def splitter(X, y):
     X_left, y_left = X[left_indices], y[left_indices]
     X_right, y_right = X[right_indices], y[right_indices]
 
-    left_subtree = splitter(X_left, y_left)
-    right_subtree = splitter(X_right, y_right)
+    left_subtree = splitter(X_left, y_left, max_depth, current_depth + 1)
+    right_subtree = splitter(X_right, y_right, max_depth, current_depth + 1)
 
     return {
         "feature_index": feature_index,
@@ -120,7 +124,7 @@ if __name__ == "__main__":
     iris = load_iris()
     # visualize_iris(iris)
     X, y = iris.data, iris.target
-    tree = splitter(X, y)
+    tree = splitter(X, y, max_depth=2)
 
     pprint.pprint(tree)
     visualize_iris(iris)
