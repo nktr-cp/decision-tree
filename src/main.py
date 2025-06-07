@@ -31,6 +31,15 @@ def visualize(iris):
     plt.show()
 
 
+# Gini impurity function
+def impurity(y):
+    """Calculate the Gini impurity for a list of labels."""
+    if len(y) == 0:
+        return 0
+    p = pd.Series(y).value_counts(normalize=True)
+    return 1 - sum(p**2)
+
+
 if __name__ == "__main__":
     iris = load_iris()
     visualize(iris)
