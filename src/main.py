@@ -70,7 +70,7 @@ def splitter(X, y):
             ) + p_right * gini_impurity(y_right)
 
             # Note
-            # this problem can also be solved by maximizing weighted_impurity
+            # this problem can also be solved by minimizing weighted_impurity
             information_gain = current_impurity - weighted_impurity
 
             if information_gain > best_gain:
