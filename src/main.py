@@ -5,6 +5,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
 from decision_tree_classifier import DecisionTreeClassifier
+from random_forest_classifier import RandomForestClassifier
 
 
 def visualize_iris(dataset):
@@ -40,11 +41,27 @@ if __name__ == "__main__":
     # visualize_iris(iris)
     X, y = iris.data, iris.target
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+    print("++++++++++++++++++++++++++++++++++++++++++")
+    print("Decision Tree and Random Forest Classifier Training")
     for depth in range(1, 5):
         print(f"Training decision tree with max depth = {depth}")
         tree = DecisionTreeClassifier(n_classes=3, max_depth=depth)
 
         tree.fit(X_train, y_train)
         y_pred = tree.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        print(f"Accuracy: {accuracy:.2f}\n")
+
+    print("++++++++++++++++++++++++++++++++++++++++++")
+    print("Random Forest Classifier Training")
+    print("n_estimators = 100")
+    for depth in range(1, 5):
+        print(f"Training random forest with max depth = {depth}")
+        rf = RandomForestClassifier(
+            n_classes=3, n_estimators=100, max_depth=depth
+        )
+        rf.fit(X_train, y_train)
+        y_pred = rf.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
         print(f"Accuracy: {accuracy:.2f}\n")
