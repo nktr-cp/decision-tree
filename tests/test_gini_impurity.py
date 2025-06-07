@@ -1,6 +1,6 @@
 from src.main import gini_impurity, splitter
 
-def test_impurity():
+def test_gini_impurity():
     # Test with a list of labels
     labels = [0, 1, 1, 2, 2, 2]
     result = gini_impurity(labels)
