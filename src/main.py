@@ -1,9 +1,9 @@
-import pprint
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.datasets import load_iris
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 
 
 def visualize_iris(dataset):
@@ -120,11 +120,36 @@ def splitter(X, y, max_depth=None, current_depth=0):
     }
 
 
+def predict_one(tree, x):
+    """Predict the class label for a single instance x."""
+    node = tree
+
+    while "value" not in node:
+        feature_index = node["feature_index"]
+        threshold = node["threshold"]
+
+        if x[feature_index] <= threshold:
+            node = node["left"]
+        else:
+            node = node["right"]
+
+    return node["value"]
+
+
+def predict(tree, X):
+    """Predict class labels for all instances in X."""
+    return np.array([predict_one(tree, x) for x in X])
+
+
 if __name__ == "__main__":
     iris = load_iris()
     # visualize_iris(iris)
     X, y = iris.data, iris.target
-    tree = splitter(X, y, max_depth=2)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    for depth in range(1, 5):
+        print(f"Training decision tree with max depth = {depth}")
+        tree = splitter(X_train, y_train, max_depth=depth)
 
-    pprint.pprint(tree)
-    visualize_iris(iris)
+        y_pred = predict(tree, X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        print(f"Accuracy: {accuracy:.2f}")
