@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from sklearn.datasets import load_iris
 
@@ -39,6 +40,51 @@ def gini_impurity(y):
     return 1 - sum(p**2)
 
 
+def splitter(X, y):
+    current_impurity = gini_impurity(y)
+
+    best_gain = 0
+    best_feature_index = None
+    best_threshold = None
+
+    n_features = X.shape[1]
+
+    for feature_index in range(n_features):
+        thresholds = np.unique(X[:, feature_index])
+
+        for i in range(len(thresholds) - 1):
+            threshold = (thresholds[i] + thresholds[i + 1]) / 2
+
+            left_indices = X[:, feature_index] <= threshold
+            right_indices = X[:, feature_index] > threshold
+
+            y_left, y_right = y[left_indices], y[right_indices]
+
+            if len(y_left) == 0 or len(y_right) == 0:
+                continue
+
+            p_left = len(y_left) / len(y)
+            p_right = len(y_right) / len(y)
+            weighted_impurity = p_left * gini_impurity(
+                y_left
+            ) + p_right * gini_impurity(y_right)
+
+            # Note
+            # this problem can also be solved by maximizing weighted_impurity
+            information_gain = current_impurity - weighted_impurity
+
+            if information_gain > best_gain:
+                best_gain = information_gain
+                best_feature_index = feature_index
+                best_threshold = threshold
+
+    return best_feature_index, best_threshold
+
+
 if __name__ == "__main__":
     iris = load_iris()
-    visualize_iris(iris)
+    # visualize_iris(iris)
+    X, y = iris.data, iris.target
+    best_feature_index, best_threshold = splitter(X, y)
+    print("Best feature:", iris.feature_names[best_feature_index])
+    print("Best threshold:", best_threshold)
